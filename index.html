@@ -964,8 +964,16 @@ function fmtTime(timeStr) {
 
 function fmtDate(dateStr) {
   if (!dateStr) return '';
-  // 統一轉為 yyyy-MM-dd，相容 2025/12/11 與 2025-12-11
-  return dateStr.trim().replace(/\//g, '-');
+  const s = String(dateStr).trim();
+  // 嘗試解析各種格式，統一轉成 yyyy-MM-dd
+  const d = new Date(s.replace(/\//g, '-'));
+  if (!isNaN(d.getTime())) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  return s.replace(/\//g, '-');
 }
 
 // ===== STATS =====
@@ -1196,18 +1204,27 @@ function checkConflict() {
 }
 
 async function loadRecordsForCheck() {
+  if (allRecords && allRecords.length > 0) return; // 已有資料，直接用
   try {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
     const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
     allRecords = parseCSV(text);
-  } catch(e) {}
+  } catch(e) {
+    console.warn('loadRecordsForCheck error:', e);
+  }
 }
 
 function showAvail(plate, date) {
   if (!plate || !date) { hideAvail(); return; }
   document.getElementById('avail-section').style.display = 'flex';
   document.getElementById('avail-plate-label').textContent = plate;
+  // 確保資料已載入後再更新狀態
+  if (!allRecords || allRecords.length === 0) {
+    loadRecordsForCheck().then(() => updateAvailability(plate, date));
+    return;
+  }
   document.getElementById('dot-selected').className = 'avail-dot loading';
   document.getElementById('detail-selected').textContent = '檢查中…';
   document.getElementById('avail-other-slots').innerHTML = '';
@@ -1707,5 +1724,7 @@ function toggleSafetyItems(val) {
 }
 
 </script>
+</body>
+</html>
 </body>
 </html>
