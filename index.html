@@ -444,8 +444,8 @@ label .required { color: var(--color-error); margin-left: 2px; }
             </div>
 
             <div class="form-group">
-              <label for="f-email">電子郵件（接收通知）</label>
-              <input type="email" id="f-email" class="form-input" placeholder="your@email.com">
+              <label for="f-email">電子郵件（接收通知）<span class="required">*</span></label>
+              <input type="email" id="f-email" class="form-input" placeholder="your@email.com" required>
             </div>
 
             <div class="form-group full">
@@ -775,8 +775,8 @@ label .required { color: var(--color-error); margin-left: 2px; }
               </select>
             </div>
             <div class="form-group">
-              <label for="ef-email">電子郵件</label>
-              <input type="email" id="ef-email" class="form-input">
+              <label for="ef-email">電子郵件 <span class="required">*</span></label>
+              <input type="email" id="ef-email" class="form-input" required>
             </div>
             <div class="form-group full">
               <label for="ef-purpose">用車事由 <span class="required">*</span></label>
@@ -1144,8 +1144,16 @@ function validateRequiredFields() {
     ['f-route', '路程'],
     ['f-passengers', '乘車人數'],
     ['f-purpose', '用車事由'],
-    ['f-safety', '行車前安全檢查表']
+    ['f-safety', '行車前安全檢查表'],
+    ['f-email',  '電子郵件']
   ];
+  // email 格式驗證
+  const emailEl = document.getElementById('f-email');
+  if (emailEl && emailEl.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) {
+    alert('請輸入正確的電子郵件格式');
+    emailEl.focus();
+    return false;
+  }
   for (const [id, label] of fields) {
     const el = document.getElementById(id);
     if (!el || !String(el.value || '').trim()) {
@@ -1349,6 +1357,7 @@ document.getElementById('booking-form').addEventListener('submit', async functio
   formData.append('entry.536923203_minute', eMin);
 
   // 其他欄位
+  formData.append('emailAddress', document.getElementById('f-email').value.trim());
   formData.append('entry.286670016',  plate);
   formData.append('entry.488663596',  document.getElementById('f-name').value);
   formData.append('entry.1600783495', document.getElementById('f-dept').value);
@@ -1577,7 +1586,8 @@ function validateEditFields() {
     ['ef-end',        '用車結束時間'],
     ['ef-route',      '路程'],
     ['ef-passengers', '乘車人數'],
-    ['ef-purpose',    '用車事由']
+    ['ef-purpose',    '用車事由'],
+    ['ef-email',     '電子郵件']
   ];
   for (const [id, label] of fields) {
     const el = document.getElementById(id);
@@ -1586,6 +1596,12 @@ function validateEditFields() {
       if (el) el.focus();
       return false;
     }
+  }
+  const efEmail2 = document.getElementById('ef-email');
+  if (efEmail2 && efEmail2.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(efEmail2.value.trim())) {
+    alert('請輸入正確的電子郵件格式');
+    efEmail2.focus();
+    return false;
   }
   const date  = document.getElementById('ef-date').value;
   const start = document.getElementById('ef-start').value;
@@ -1614,6 +1630,7 @@ document.getElementById('edit-form').addEventListener('submit', async function(e
   const [eHour, eMin] = end.split(':');
 
   const formData = new FormData();
+  formData.append('emailAddress', document.getElementById('ef-email').value.trim());
   formData.append('entry.286670016',  plate);
   formData.append('entry.488663596',  document.getElementById('ef-name').value);
   formData.append('entry.1600783495', document.getElementById('ef-dept').value);
