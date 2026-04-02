@@ -352,7 +352,7 @@ label .required { color: var(--color-error); margin-left: 2px; }
           <div class="conflict-list" id="conflict-list"></div>
         </div>
 
-        <form id="booking-form" autocomplete="off">
+        <form id="booking-form" novalidate autocomplete="off">
           <div class="form-grid">
 
             <div class="form-group">
@@ -407,21 +407,12 @@ label .required { color: var(--color-error); margin-left: 2px; }
               <!-- 時段可用狀態 -->
               <div id="avail-section" class="availability-bar" style="display:none;">
                 <div style="font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;">車輛當日可用狀況</div>
-                <div id="avail-rff8323" class="avail-item">
-                  <div class="avail-dot loading" id="dot-RFF-8323"></div>
-                  <span class="avail-label">RFF-8323</span>
-                  <span class="avail-detail" id="detail-RFF-8323">檢查中…</span>
+                <div class="avail-item">
+                  <div class="avail-dot loading" id="dot-selected"></div>
+                  <span class="avail-label" id="avail-plate-label">—</span>
+                  <span class="avail-detail" id="detail-selected">請選擇車牌與日期</span>
                 </div>
-                <div id="avail-rff8522" class="avail-item">
-                  <div class="avail-dot loading" id="dot-RFF-8522"></div>
-                  <span class="avail-label">RFF-8522</span>
-                  <span class="avail-detail" id="detail-RFF-8522">檢查中…</span>
-                </div>
-                <div id="avail-rff8523" class="avail-item">
-                  <div class="avail-dot loading" id="dot-RFF-8523"></div>
-                  <span class="avail-label">RFF-8523</span>
-                  <span class="avail-detail" id="detail-RFF-8523">檢查中…</span>
-                </div>
+                <div id="avail-other-slots" style="margin-top:var(--space-2);font-size:var(--text-xs);color:var(--color-text-muted);padding-left:var(--space-6);line-height:1.8;"></div>
               </div>
             </div>
 
@@ -463,11 +454,56 @@ label .required { color: var(--color-error); margin-left: 2px; }
             </div>
 
             <div class="form-group full">
-              <label for="f-safety">行車前安全檢查表</label>
-              <select id="f-safety" class="form-select">
+              <label for="f-safety">行車前安全檢查表 <span class="required">*</span></label>
+              <select id="f-safety" class="form-select" onchange="toggleSafetyItems(this.value)" required>
                 <option value="以上項目經本人檢視，無「不正常」情況（點選提交表單）">以上項目經本人檢視，無「不正常」情況</option>
                 <option value="有不正常情況，請見備註">有不正常情況，請見備註</option>
               </select>
+            </div>
+            <div class="form-group full" id="safety-items-section" style="display:none;">
+              <label>車內各部件不正常請勾選（可複選）</label>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--space-1) var(--space-4);margin-top:var(--space-3);padding:var(--space-4);background:var(--color-surface-2);border-radius:var(--radius-md);border:1px solid var(--color-divider);">
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="煞車系統" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 煞車系統
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="燃料" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 燃料
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="機油" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 機油
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="水箱" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 水箱
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="輪胎" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 輪胎
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="電瓶" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 電瓶
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="各組燈光" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 各組燈光
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="方向盤" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 方向盤
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="儀表" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 儀表
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="後視鏡" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 後視鏡
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="清潔衛生" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 清潔衛生
+    </label>
+    <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:400;cursor:pointer;padding:var(--space-1) 0;">
+      <input type="checkbox" name="safety-check" value="其他" style="width:16px;height:16px;accent-color:var(--color-primary);cursor:pointer;"> 其他
+    </label>
+              </div>
+              <div style="margin-top:var(--space-3);">
+                <label for="f-safety-note" style="font-size:var(--text-xs);color:var(--color-text-muted);">改善建議說明</label>
+                <textarea id="f-safety-note" class="form-input" rows="3" style="margin-top:var(--space-2);resize:vertical;" placeholder="請填寫各項不正常部件的改善建議…"></textarea>
+              </div>
             </div>
 
           </div>
@@ -681,7 +717,7 @@ label .required { color: var(--color-error); margin-left: 2px; }
           </div>
           <div class="conflict-list" id="edit-conflict-list"></div>
         </div>
-        <form id="edit-form" autocomplete="off">
+        <form id="edit-form" autocomplete="off" novalidate>
           <input type="hidden" id="edit-row-index">
           <div class="form-grid">
             <div class="form-group">
@@ -1087,6 +1123,54 @@ function nextMonth() {
 // ===== CONFLICT CHECK =====
 let checkTimer = null;
 
+
+function validateRequiredFields() {
+  const fields = [
+    ['f-plate', '車牌號碼'],
+    ['f-name', '駕駛人姓名代號'],
+    ['f-dept', '使用部門'],
+    ['f-title', '駕駛人職稱'],
+    ['f-date', '派車日期'],
+    ['f-start', '用車開始時間'],
+    ['f-end', '用車結束時間'],
+    ['f-route', '路程'],
+    ['f-passengers', '乘車人數'],
+    ['f-purpose', '用車事由'],
+    ['f-safety', '行車前安全檢查表']
+  ];
+  for (const [id, label] of fields) {
+    const el = document.getElementById(id);
+    if (!el || !String(el.value || '').trim()) {
+      alert(`請填寫必填欄位：${label}`);
+      if (el) el.focus();
+      return false;
+    }
+  }
+  const safety = document.getElementById('f-safety').value;
+  if (safety.includes('不正常')) {
+    const checked = document.querySelectorAll('input[name="safety-check"]:checked').length;
+    const note = document.getElementById('f-safety-note').value.trim();
+    if (checked === 0) {
+      alert('請勾選至少一項車內各部件不正常項次');
+      return false;
+    }
+    if (!note) {
+      alert('請填寫改善建議說明');
+      document.getElementById('f-safety-note').focus();
+      return false;
+    }
+  }
+  const date = document.getElementById('f-date').value;
+  const start = document.getElementById('f-start').value;
+  const end = document.getElementById('f-end').value;
+  if (date && start && end && new Date(`${date}T${start}`) >= new Date(`${date}T${end}`)) {
+    alert('用車結束時間必須晚於開始時間');
+    document.getElementById('f-end').focus();
+    return false;
+  }
+  return true;
+}
+
 function checkConflict() {
   const plate = document.getElementById('f-plate').value;
   const date  = document.getElementById('f-date').value;
@@ -1094,9 +1178,9 @@ function checkConflict() {
   const end   = document.getElementById('f-end').value;
 
   hideConflict();
-  if (!date) { hideAvail(); return; }
+  if (!plate || !date) { hideAvail(); return; }
 
-  showAvail(date);
+  showAvail(plate, date);
 
   if (!plate || !start || !end) return;
 
@@ -1120,41 +1204,45 @@ async function loadRecordsForCheck() {
   } catch(e) {}
 }
 
-function showAvail(date) {
+function showAvail(plate, date) {
+  if (!plate || !date) { hideAvail(); return; }
   document.getElementById('avail-section').style.display = 'flex';
-  ['RFF-8323','RFF-8522','RFF-8523'].forEach(p => {
-    document.getElementById(`dot-${p}`).className = 'avail-dot loading';
-    document.getElementById(`detail-${p}`).textContent = '檢查中…';
-  });
-
+  document.getElementById('avail-plate-label').textContent = plate;
+  document.getElementById('dot-selected').className = 'avail-dot loading';
+  document.getElementById('detail-selected').textContent = '檢查中…';
+  document.getElementById('avail-other-slots').innerHTML = '';
   if (allRecords.length === 0) {
-    loadRecordsForCheck().then(() => updateAvailability(date));
+    loadRecordsForCheck().then(() => updateAvailability(plate, date));
     return;
   }
-  updateAvailability(date);
+  updateAvailability(plate, date);
 }
 
 function hideAvail() {
   document.getElementById('avail-section').style.display = 'none';
 }
 
-function updateAvailability(date) {
-  ['RFF-8323','RFF-8522','RFF-8523'].forEach(plate => {
-    const conflicts = allRecords.filter(r => {
-      if (r['車牌號碼'] !== plate) return false;
-      return fmtDate(r['派車日期']) === date;
-    });
-    const dot    = document.getElementById(`dot-${plate}`);
-    const detail = document.getElementById(`detail-${plate}`);
-    if (conflicts.length === 0) {
-      dot.className = 'avail-dot free';
-      detail.textContent = '當日無預約，可使用';
-    } else {
-      dot.className = 'avail-dot busy';
-      const slots = conflicts.map(r => `${fmtTime(r['用車開始時間'])}～${fmtTime(r['用車結束時間'])}`).join('、');
-      detail.textContent = `已有 ${conflicts.length} 筆預約：${slots}`;
-    }
+function updateAvailability(plate, date) {
+  const conflicts = allRecords.filter(r => {
+    if (r['刪單'] === 'Y') return false;
+    if (r['車牌號碼'] !== plate) return false;
+    return fmtDate(r['派車日期']) === fmtDate(date);
   });
+  const dot     = document.getElementById('dot-selected');
+  const detail  = document.getElementById('detail-selected');
+  const otherEl = document.getElementById('avail-other-slots');
+  document.getElementById('avail-plate-label').textContent = plate;
+  if (conflicts.length === 0) {
+    dot.className = 'avail-dot free';
+    detail.textContent = '當日無預約，可使用';
+    otherEl.innerHTML = '';
+  } else {
+    dot.className = 'avail-dot busy';
+    detail.textContent = `已有 ${conflicts.length} 筆預約（部分時段佔用）`;
+    otherEl.innerHTML = conflicts.map(r =>
+      `• ${fmtTime(r['用車開始時間'])}～${fmtTime(r['用車結束時間'])} ／ ${r['使用部門'] || ''} ${r['駕駛人姓名代號(不含前面英文)'] || ''}`
+    ).join('<br>');
+  }
 }
 
 function doCheck(plate, date, startMs, endMs) {
@@ -1195,6 +1283,8 @@ function hideConflict() {
 // ===== FORM SUBMIT =====
 document.getElementById('booking-form').addEventListener('submit', async function(e) {
   e.preventDefault();
+
+  if (!validateRequiredFields()) return;
 
   const plate  = document.getElementById('f-plate').value;
   const date   = document.getElementById('f-date').value;
@@ -1249,7 +1339,21 @@ document.getElementById('booking-form').addEventListener('submit', async functio
   formData.append('entry.838415905',  document.getElementById('f-route').value);
   formData.append('entry.2031184796', document.getElementById('f-passengers').value);
   formData.append('entry.1667679515', document.getElementById('f-purpose').value);
+  // 行車前安全檢查（主選單）
   formData.append('entry.1909809929', document.getElementById('f-safety').value);
+
+  // 各項次不正常勾選（entry.1606250413，多選）
+  formData.append('entry.1606250413_sentinel', '__checkbox_sentinel__');
+  const checkedItems = Array.from(document.querySelectorAll('input[name="safety-check"]:checked'));
+  if (checkedItems.length > 0) {
+    checkedItems.forEach(cb => formData.append('entry.1606250413', cb.value));
+  }
+
+  // 改善建議（entry.1239054828）
+  const safetyNote = document.getElementById('f-safety-note');
+  if (safetyNote && safetyNote.value.trim()) {
+    formData.append('entry.1239054828', safetyNote.value.trim());
+  }
 
   try {
     await fetch(FORM_URL, { method: 'POST', body: formData, mode: 'no-cors' });
@@ -1272,6 +1376,11 @@ document.getElementById('booking-form').addEventListener('submit', async functio
 });
 
 function resetForm() {
+  document.querySelectorAll('input[name="safety-check"]').forEach(cb => cb.checked = false);
+  const note = document.getElementById('f-safety-note');
+  if (note) note.value = '';
+  const sec = document.getElementById('safety-items-section');
+  if (sec) sec.style.display = 'none';
   document.getElementById('booking-form').reset();
   document.getElementById('success-banner').classList.remove('show');
   hideConflict();
@@ -1439,8 +1548,42 @@ function updateEditAvail() {
   });
 });
 
+
+function validateEditFields() {
+  const fields = [
+    ['ef-plate',      '車牌號碼'],
+    ['ef-dept',       '使用部門'],
+    ['ef-name',       '駕駛人姓名代號'],
+    ['ef-title',      '駕駛人職稱'],
+    ['ef-date',       '派車日期'],
+    ['ef-start',      '用車開始時間'],
+    ['ef-end',        '用車結束時間'],
+    ['ef-route',      '路程'],
+    ['ef-passengers', '乘車人數'],
+    ['ef-purpose',    '用車事由']
+  ];
+  for (const [id, label] of fields) {
+    const el = document.getElementById(id);
+    if (!el || !String(el.value || '').trim()) {
+      alert(`請填寫必填欄位：${label}`);
+      if (el) el.focus();
+      return false;
+    }
+  }
+  const date  = document.getElementById('ef-date').value;
+  const start = document.getElementById('ef-start').value;
+  const end   = document.getElementById('ef-end').value;
+  if (date && start && end && new Date(`${date}T${start}`) >= new Date(`${date}T${end}`)) {
+    alert('用車結束時間必須晚於開始時間');
+    document.getElementById('ef-end').focus();
+    return false;
+  }
+  return true;
+}
+
 document.getElementById('edit-form').addEventListener('submit', async function(e) {
   e.preventDefault();
+  if (!validateEditFields()) return;
   const btn = document.getElementById('edit-submit-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> 送出中…';
@@ -1469,6 +1612,7 @@ document.getElementById('edit-form').addEventListener('submit', async function(e
   formData.append('entry.2031184796', document.getElementById('ef-passengers').value);
   formData.append('entry.1667679515', document.getElementById('ef-purpose').value);
   formData.append('entry.1909809929', '以上項目經本人檢視，無「不正常」情況（點選提交表單）');
+  formData.append('entry.1606250413_sentinel', '__checkbox_sentinel__');
 
   try {
     await fetch(FORM_URL, { method: 'POST', body: formData, mode: 'no-cors' });
@@ -1547,6 +1691,20 @@ async function confirmDelete() {
 document.getElementById('delete-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeDeleteModal();
 });
+
+
+function toggleSafetyItems(val) {
+  const sec = document.getElementById('safety-items-section');
+  if (val && val.includes('不正常')) {
+    sec.style.display = 'block';
+  } else {
+    sec.style.display = 'none';
+    // 清除勾選
+    document.querySelectorAll('input[name="safety-check"]').forEach(cb => cb.checked = false);
+    const note = document.getElementById('f-safety-note');
+    if (note) note.value = '';
+  }
+}
 
 </script>
 </body>
