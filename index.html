@@ -902,8 +902,8 @@ function switchTab(tab) {
 async function loadRecords() {
   document.getElementById('records-tbody').innerHTML = '<tr class="loading-row"><td colspan="8"><span class="spinner"></span>從 Google Sheets 讀取中…</td></tr>';
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-    const res = await fetch(url);
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}&t=` + Date.now();
+    const res = await fetch(url, { cache: 'no-store' });
     const text = await res.text();
     allRecords = parseCSV(text);
     updateStats();
@@ -1211,11 +1211,11 @@ function checkConflict() {
   doCheck(plate, date, startMs, endMs);
 }
 
-async function loadRecordsForCheck() {
-  if (allRecords && allRecords.length > 0) return; // 已有資料，直接用
+async function loadRecordsForCheck(forceRefresh = false) {
+  if (!forceRefresh && allRecords && allRecords.length > 0) return;
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-    const res = await fetch(url);
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}&t=` + Date.now();
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
     allRecords = parseCSV(text);
@@ -1316,27 +1316,40 @@ document.getElementById('booking-form').addEventListener('submit', async functio
   const start  = document.getElementById('f-start').value;
   const end    = document.getElementById('f-end').value;
 
-  // Final conflict check
-  if (allRecords.length > 0) {
-    const startMs = new Date(`${date}T${start}`).getTime();
-    const endMs   = new Date(`${date}T${end}`).getTime();
-    const hasConflict = allRecords.some(r => {
-      if (r['車牌號碼'] !== plate) return false;
-      if (fmtDate(r['派車日期']) !== fmtDate(date)) return false;
-      const rStart = parseDateTime(r['派車日期'], r['用車開始時間']);
-      const rEnd   = parseDateTime(r['派車日期'], r['用車結束時間']);
-      if (!rStart || !rEnd) return false;
-      return startMs < rEnd.getTime() && endMs > rStart.getTime();
-    });
-    if (hasConflict) {
-      alert('⚠️ 該時段已有人預約，請重新選擇時間或車輛！');
-      return;
-    }
-  }
-
-  // Submit to Google Form
+  // Final conflict check — 強制重新抓取最新資料，避免快取導致漏判
   const submitBtn = document.getElementById('submit-btn');
   submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="spinner"></span> 衝突檢查中…';
+
+  try {
+    const checkUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}&t=` + Date.now();
+    const checkRes = await fetch(checkUrl, { cache: 'no-store' });
+    if (checkRes.ok) {
+      allRecords = parseCSV(await checkRes.text());
+    }
+  } catch(e) {
+    console.warn('送出前重新載入資料失敗，使用快取資料:', e);
+  }
+
+  const startMs = new Date(`${date}T${start}`).getTime();
+  const endMs   = new Date(`${date}T${end}`).getTime();
+  const hasConflict = allRecords.some(r => {
+    if ((r['刪單'] || '').toUpperCase() === 'Y') return false;
+    if (r['車牌號碼'] !== plate) return false;
+    if (fmtDate(r['派車日期']) !== fmtDate(date)) return false;
+    const rStart = parseDateTime(r['派車日期'], r['用車開始時間']);
+    const rEnd   = parseDateTime(r['派車日期'], r['用車結束時間']);
+    if (!rStart || !rEnd) return false;
+    return startMs < rEnd.getTime() && endMs > rStart.getTime();
+  });
+
+  if (hasConflict) {
+    alert('⚠️ 該時段已有人預約，請重新選擇時間或車輛！');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg> 送出申請';
+    return;
+  }
+
   submitBtn.innerHTML = '<span class="spinner"></span> 送出中…';
 
   const formData = new FormData();
@@ -1390,8 +1403,8 @@ document.getElementById('booking-form').addEventListener('submit', async functio
     this.reset();
     hideConflict();
     hideAvail();
-    // reload records
-    await loadRecordsForCheck();
+    // reload records（強制刷新，確保最新資料）
+    await loadRecordsForCheck(true);
     updateStats();
   } catch(err) {
     alert('送出失敗，請稍後再試。\n' + err.message);
